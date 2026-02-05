@@ -1,0 +1,452 @@
+basePath: /v1
+definitions:
+  main.CreatePostRequest:
+    properties:
+      content:
+        maxLength: 255
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        maxLength: 200
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  main.FollowUserRequest:
+    properties:
+      user_id:
+        minimum: 1
+        type: integer
+    required:
+    - user_id
+    type: object
+  main.UpdatePostRequest:
+    properties:
+      content:
+        maxLength: 255
+        type: string
+      title:
+        maxLength: 200
+        type: string
+    type: object
+  store.Comment:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      post_id:
+        type: integer
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/store.User'
+      user_id:
+        type: integer
+    type: object
+  store.Post:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/store.Comment'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/store.User'
+      user_id:
+        type: integer
+      version:
+        type: integer
+    type: object
+  store.PostWithMeta:
+    properties:
+      comment_count:
+        type: integer
+      comments:
+        items:
+          $ref: '#/definitions/store.Comment'
+        type: array
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      updated_at:
+        type: string
+      user:
+        $ref: '#/definitions/store.User'
+      user_id:
+        type: integer
+      version:
+        type: integer
+    type: object
+  store.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: https://github.com/your-org/socialv3
+  description: 'API untuk aplikasi sosial: manajemen users, posts, follow/unfollow,
+    dan feed.'
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Social API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Mengecek status kesehatan API. Mengembalikan status, env, dan version.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: status (ok), env, version
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /posts:
+    post:
+      consumes:
+      - application/json
+      description: Membuat post baru. Memerlukan title, content, dan optional tags.
+      parameters:
+      - description: Data post
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Post yang baru dibuat
+          schema:
+            $ref: '#/definitions/store.Post'
+        "400":
+          description: Request body tidak valid
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Buat post baru
+      tags:
+      - posts
+  /posts/{postID}:
+    delete:
+      description: Menghapus post berdasarkan ID.
+      parameters:
+      - description: ID post
+        in: path
+        name: postID
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: ID tidak valid
+          schema:
+            type: object
+        "404":
+          description: Post tidak ditemukan
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Hapus post
+      tags:
+      - posts
+    get:
+      description: Mengambil satu post berdasarkan ID beserta daftar komentar.
+      parameters:
+      - description: ID post
+        in: path
+        name: postID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Detail post dengan komentar
+          schema:
+            $ref: '#/definitions/store.Post'
+        "400":
+          description: ID tidak valid
+          schema:
+            type: object
+        "404":
+          description: Post tidak ditemukan
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Ambil detail post
+      tags:
+      - posts
+    put:
+      consumes:
+      - application/json
+      description: Mengubah title dan/atau content post. Field bersifat optional (partial
+        update).
+      parameters:
+      - description: ID post
+        in: path
+        name: postID
+        required: true
+        type: integer
+      - description: Data yang di-update (title, content)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Post setelah di-update
+          schema:
+            $ref: '#/definitions/store.Post'
+        "400":
+          description: Request body tidak valid
+          schema:
+            type: object
+        "404":
+          description: Post tidak ditemukan
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Update post
+      tags:
+      - posts
+  /users/{userID}:
+    get:
+      description: Mengambil satu user berdasarkan ID.
+      parameters:
+      - description: ID user
+        in: path
+        name: userID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Detail user
+          schema:
+            $ref: '#/definitions/store.User'
+        "400":
+          description: ID tidak valid
+          schema:
+            type: object
+        "404":
+          description: User tidak ditemukan
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Ambil detail user
+      tags:
+      - users
+  /users/{userID}/follow:
+    put:
+      consumes:
+      - application/json
+      description: User saat ini (dari context) mem-follow user dengan user_id dari
+        body.
+      parameters:
+      - description: ID user (follower / yang mem-follow)
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: ID user yang akan di-follow
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.FollowUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: user followed successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Request body tidak valid
+          schema:
+            type: object
+        "404":
+          description: User tidak ditemukan
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Follow user
+      tags:
+      - users
+  /users/{userID}/unfollow:
+    put:
+      consumes:
+      - application/json
+      description: User saat ini (dari context) unfollow user dengan user_id dari
+        body.
+      parameters:
+      - description: ID user (yang unfollow)
+        in: path
+        name: userID
+        required: true
+        type: integer
+      - description: ID user yang akan di-unfollow
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/main.FollowUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: user unfollowed successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Request body tidak valid
+          schema:
+            type: object
+        "404":
+          description: User tidak ditemukan
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Unfollow user
+      tags:
+      - users
+  /users/feed:
+    get:
+      description: 'Mengambil feed post (dari user yang di-follow) dengan paginasi.
+        Query: limit, offset, sort (asc/desc), tags (comma-separated), search, since,
+        until.'
+      parameters:
+      - default: 10
+        description: Limit (1-100)
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset
+        in: query
+        name: offset
+        type: integer
+      - default: '"desc"'
+        description: Sort (asc/desc)
+        in: query
+        name: sort
+        type: string
+      - description: Filter tags (comma-separated)
+        in: query
+        name: tags
+        type: string
+      - description: Search
+        in: query
+        name: search
+        type: string
+      - description: Filter sejak (datetime)
+        in: query
+        name: since
+        type: string
+      - description: Filter sampai (datetime)
+        in: query
+        name: until
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Daftar post di feed
+          schema:
+            items:
+              $ref: '#/definitions/store.PostWithMeta'
+            type: array
+        "400":
+          description: Query tidak valid
+          schema:
+            type: object
+        "500":
+          description: Server error
+          schema:
+            type: object
+      summary: Feed user
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    description: Bearer token untuk autentikasi
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

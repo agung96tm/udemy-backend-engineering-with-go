@@ -1,0 +1,36 @@
+# IDE
+.idea/
+
+# Binaries / build
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test / coverage
+*.test
+*.out
+coverage.html
+coverage.txt
+
+# Go workspace
+go.work
+go.work.sum
+
+# Env (uncomment if you keep secrets in .env)
+# .env
+# .env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Air (live reload)
+tmp/
+
+# Misc
+*.log
+*.swp
+*~

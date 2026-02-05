@@ -1,0 +1,50 @@
+package env
+
+import (
+	"os"
+	"strconv"
+)
+
+func GetString(key string, fallback string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	return val
+}
+
+func GetInt(key string, fallback int) int {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	i, err := strconv.Atoi(val)
+	if err != nil {
+		return fallback
+	}
+	return i
+}
+
+func GetBool(key string, fallback bool) bool {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	b, err := strconv.ParseBool(val)
+	if err != nil {
+		return fallback
+	}
+	return b
+}
+
+func GetFloat(key string, fallback float64) float64 {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	f, err := strconv.ParseFloat(val, 64)
+	if err != nil {
+		return fallback
+	}
+	return f
+}
