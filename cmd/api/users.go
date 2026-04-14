@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"socialv3/internal/store"
@@ -143,30 +142,30 @@ func (app *application) activateUserHandler(w http.ResponseWriter, r *http.Reque
 	})
 }
 
-func (app *application) userContextMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userID, err := app.readID(r, "userID")
-		if err != nil {
-			app.badRequestError(w, r, err)
-			return
-		}
-
-		ctx := r.Context()
-		user, err := app.store.Users.GetByID(ctx, userID)
-		if err != nil {
-			switch {
-			case errors.Is(err, store.ErrNotFound):
-				app.notFoundError(w, r, err)
-			default:
-				app.internalServerError(w, r, err)
-			}
-			return
-		}
-		ctx = context.WithValue(ctx, userCtx, user)
-
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
+//func (app *application) userContextMiddleware(next http.Handler) http.Handler {
+//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+//		userID, err := app.readID(r, "userID")
+//		if err != nil {
+//			app.badRequestError(w, r, err)
+//			return
+//		}
+//
+//		ctx := r.Context()
+//		user, err := app.store.Users.GetByID(ctx, userID)
+//		if err != nil {
+//			switch {
+//			case errors.Is(err, store.ErrNotFound):
+//				app.notFoundError(w, r, err)
+//			default:
+//				app.internalServerError(w, r, err)
+//			}
+//			return
+//		}
+//		ctx = context.WithValue(ctx, userCtx, user)
+//
+//		next.ServeHTTP(w, r.WithContext(ctx))
+//	})
+//}
 
 func getUserFromContext(r *http.Request) *store.User {
 	ctx := r.Context()
