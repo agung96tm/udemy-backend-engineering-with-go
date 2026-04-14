@@ -157,7 +157,7 @@ func (s *PostStore) GetUserFeed(ctx context.Context, userID int64, fq PaginatedF
 				f.user_id IS NOT NULL
 				OR p.user_id = $1
 			)
-			AND ($4 = '' OR p.title ILIKE '%' || $4 || '%' OR p.content ILIKE '%' || $4 || '%')
+			AND ($4 = '' OR p.title ILIKE '%%' || $4 || '%%' OR p.content ILIKE '%%' || $4 || '%%')
 			AND (cardinality($5) = 0 OR p.tags @> $5)
 			AND ($6 = '' OR p.created_at >= $6)
 			AND ($7 = '' OR p.created_at <= $7)
